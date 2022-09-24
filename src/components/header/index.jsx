@@ -1,4 +1,4 @@
-import { View, Image, TouchableOpacity } from "react-native";
+import { View, Image, TouchableOpacity, Platform } from "react-native";
 import React from "react";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import Title from "../title";
@@ -68,7 +68,7 @@ const Header = () => {
   return (
     <View
       style={{
-        marginTop: 60,
+        paddingTop: Platform.OS === "android" ? 16 : 60,
         minHeight: 100,
         backgroundColor: Colors.WHITE,
         borderBottomColor: Colors.MAIN,
