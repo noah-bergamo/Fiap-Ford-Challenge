@@ -1,53 +1,21 @@
 import { View, Text, FlatList, Image, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import Title from "../../components/title";
+import { useSelector } from "react-redux";
 import { Colors } from "../../utils/colors";
+import Title from "../../components/title";
 import Label from "../../components/label";
-import { navigationConstants } from "../../routes/constants";
-import { getCountryFlagURI } from "../../utils/helpers";
-import { Fonts } from "../../utils/fonts";
+import Button from "../../components/button";
+import RedeemCodeModal from "../../components/RedeemCodeModal";
 import useAPI from "../../hooks/useAPI";
+import { Toast } from "react-native-toast-message/lib/src/Toast";
 
-const CategoryDetailScreen = () => {
-  const navigation = useNavigation();
-  const route = useRoute();
+const HistoryScreen = () => {
+  const { user } = useSelector((state) => state.user);
   const api = useAPI();
-  const [rewards, setRewards] = useState([]);
-
-  const { category } = route.params;
-
-  const getRewards = async () => {
-    const response = await api.get(
-      `rewards/categories/${
-        category.name === "Ford GO" ? "Assinaturas" : category.name
-      }`
-    );
-    const rewardList = rewardsObjectArray(response.data);
-    setRewards(rewardList);
-    console.log({ rewardList: response.data });
-  };
-
-  const rewardsObjectArray = (rewardsArray) => {
-    const objArr = [];
-    rewardsArray.map((item, i) => {
-      const reward = {
-        ...item,
-        image:
-          item.category.uuid === "3b4654bc-f25b-4412-ade3-a7c096d6f51b" ||
-          item.category.uuid === "1d786a5d-7134-42c0-87fa-ff804ad29c72"
-            ? getImage(item.name)
-            : null,
-      };
-      objArr.push(reward);
-    });
-    return objArr;
-  };
-
-  useEffect(() => {
-    getRewards();
-  }, []);
-
+  const [showCodeModal, setShowCodeModal] = useState(false);
+  const [selectedReward, setSelectedReward] = useState(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyData, setHistoryData] = useState([]);
   const getImage = (carName) => {
     switch (carName) {
       case "Ford Bronco Sport":
@@ -67,124 +35,119 @@ const CategoryDetailScreen = () => {
         return "https://viaforveiculos.com.br/assets/images/versoes/9238704.png";
     }
   };
-  const renderRewardCard = ({ item }) => {
-    return (
-      <TouchableOpacity
-        onPress={() =>
-          navigation.navigate(navigationConstants.SCREENS.REWARD_DETAILS, {
-            reward: item,
-            isCarInfoDetail:
-              item.category.uuid === "3b4654bc-f25b-4412-ade3-a7c096d6f51b" ||
-              item.category.uuid === "1d786a5d-7134-42c0-87fa-ff804ad29c72",
-          })
-        }
+
+  useEffect(() => {
+    getHistory();
+  }, []);
+
+  const getHistory = async () => {
+    try {
+      const customerId = user.uuid;
+      const response = await api.get(
+        `customers/${customerId}/rewards/redeemed`
+      );
+      const obj = formatHistoryArray(response.data);
+      console.log({ obj });
+      setHistoryData(obj);
+    } catch (error) {
+      console.log({ error });
+      Toast.show({
+        type: "error",
+        text1: "Resgate de pontos",
+        text2: "Houve um problema ao verificar o código",
+      });
+    }
+  };
+  const formatHistoryArray = (array) => {
+    const formattedArray = [];
+    array.map((item, index) => {
+      item.redeemedRewards.map((reward) => formattedArray.push(reward));
+    });
+    return formattedArray;
+  };
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+      }}
+    >
+      <View style={{ marginHorizontal: 16, marginTop: 16, marginBottom: 24 }}>
+        <Title size={20}>
+          {showHistory ? "Histórico de cupons" : "Meus cupons"}
+        </Title>
+      </View>
+      <FlatList
+        data={showHistory ? historyData : user.rewards}
+        renderItem={({ item }) => {
+          const hasPhoto =
+            item.category.uuid === "3b4654bc-f25b-4412-ade3-a7c096d6f51b" ||
+            item.category.uuid === "1d786a5d-7134-42c0-87fa-ff804ad29c72";
+          return (
+            <TouchableOpacity
+              style={{
+                // backgroundColor: "red",
+                flex: 1,
+                height: 90,
+                alignItems: "center",
+                paddingHorizontal: 16,
+                marginVertical: 4,
+                backgroundColor: Colors.WHITE,
+                marginHorizontal: 16,
+                borderRadius: 8,
+                flexDirection: "row",
+              }}
+              onPress={() => {
+                if (showHistory) return;
+                setSelectedReward(item);
+                setShowCodeModal(true);
+              }}
+            >
+              <View style={{ flex: 1 }}>
+                <Title size={20}>
+                  {item.category.name === "Assinaturas"
+                    ? "Ford GO"
+                    : item.category.name}
+                </Title>
+                <Label>{item.name}</Label>
+              </View>
+              {hasPhoto && (
+                <View style={{ flex: 1, alignItems: "flex-end" }}>
+                  <Image
+                    source={{ uri: getImage(item.name) }}
+                    style={{ width: 150, height: 80 }}
+                    resizeMethod="resize"
+                    resizeMode="cover"
+                  />
+                </View>
+              )}
+            </TouchableOpacity>
+          );
+        }}
+      />
+      <View
         style={{
-          flex: 1,
-          backgroundColor: Colors.WHITE,
-          marginTop: 16,
-          marginHorizontal: 16,
-          borderRadius: 8,
-          paddingBottom: 16,
+          backgroundColor: Colors.MAIN,
+          paddingVertical: 24,
+          paddingHorizontal: 16,
         }}
       >
-        <View
-          style={{
-            marginTop: 16,
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexDirection: "row",
-            paddingLeft: 16,
-          }}
-        >
-          <View
-            style={{
-              justifyContent: "space-around",
-              alignItems: "center",
-              flexDirection: "row",
-            }}
-          >
-            {item.destination && item.destination.country && (
-              <>
-                <Image
-                  source={{
-                    uri: getCountryFlagURI(item.destination?.country),
-                  }}
-                  style={{
-                    width: 30,
-                    height: 30,
-                    marginRight: 10,
-                  }}
-                  resizeMethod="resize"
-                  resizeMode="contain"
-                />
-                <Label medium>
-                  {(item.destination &&
-                    (item.category.uuid ===
-                    "3b4654bc-f25b-4412-ade3-a7c096d6f51b"
-                      ? item.destination.takeOut
-                      : item.destination.country)) ||
-                    ""}
-                </Label>
-              </>
-            )}
-          </View>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            paddingHorizontal: 16,
-          }}
-        >
-          <View style={{ flex: 1, justifyContent: "center" }}>
-            <Title size={20}>{item.name}</Title>
-            <View style={{ height: 12 }} />
-            <Title size={18}>
-              {item.points}{" "}
-              <Title size={18} medium>
-                pontos
-              </Title>
-            </Title>
-          </View>
-          {item.image && (
-            <View>
-              <Image
-                source={{
-                  uri: getImage(item.name),
-                }}
-                style={{ width: 170, height: 110 }}
-                resizeMethod="resize"
-                resizeMode="contain"
-              />
-            </View>
-          )}
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
-  return (
-    <View style={{ flex: 1, backgroundColor: Colors.MAIN }}>
-      <FlatList
-        data={rewards}
-        ListHeaderComponent={() => (
-          <Text
-            style={{
-              color: "white",
-              fontFamily: Fonts.BOLD,
-              fontSize: 20,
-              marginBottom: 8,
-              marginTop: 16,
-              marginLeft: 16,
-            }}
-          >
-            {category.name}
-          </Text>
+        {showHistory ? (
+          <View />
+        ) : (
+          <RedeemCodeModal
+            modalVisible={showCodeModal}
+            reward={selectedReward}
+            onRequestClose={() => setShowCodeModal(false)}
+          />
         )}
-        renderItem={renderRewardCard}
-      />
+        <Button
+          label={`Ver ${showHistory ? "cupons disponíveis" : "histórico"}`}
+          onPress={() => setShowHistory(!showHistory)}
+        />
+      </View>
     </View>
   );
 };
 
-export default CategoryDetailScreen;
+export default HistoryScreen;

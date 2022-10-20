@@ -5,18 +5,14 @@ import Title from "../title";
 import { Colors } from "../../utils/colors";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { navigationConstants } from "../../routes/constants";
-
-const user = {
-  name: "Guilherme de Mira",
-  photo:
-    "https://media-exp1.licdn.com/dms/image/C4D03AQHuPGnjIXjYRg/profile-displayphoto-shrink_200_200/0/1598300039292?e=2147483647&v=beta&t=DI1z2LuiEVxMnHDaV_XbsLuzRdqglZ5Ho5IwAymxENM",
-  points: "30.000",
-};
+import { useSelector } from "react-redux";
 
 const Header = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const canGoBack = route.name !== navigationConstants.SCREENS.CATEGORIES_LIST;
+
+  const { user } = useSelector((state) => state.user);
   const renderBackIcon = () => {
     return (
       <TouchableOpacity
@@ -57,7 +53,10 @@ const Header = () => {
         }}
       >
         <Image
-          source={{ uri: user.photo }}
+          // source={{ uri: user.photo }}
+          source={{
+            uri: "https://media-exp1.licdn.com/dms/image/C4D03AQHuPGnjIXjYRg/profile-displayphoto-shrink_200_200/0/1598300039292?e=2147483647&v=beta&t=DI1z2LuiEVxMnHDaV_XbsLuzRdqglZ5Ho5IwAymxENM",
+          }}
           resizeMethod="resize"
           resizeMode="contain"
           style={{ width: 48, height: 48, borderRadius: 200 }}
@@ -111,13 +110,13 @@ const Header = () => {
           {renderAvatar()}
           <View style={{ width: 8 }} />
           <Title numberOfLines={2} style={{ maxWidth: 130 }}>
-            {user.name}
+            {user.firstName} {user.lastName}
           </Title>
         </View>
         <View style={{ alignItems: "flex-end" }}>
           <Title medium>Seu saldo é de</Title>
           <Title medium>
-            <Title size={20}>{user.points} </Title>pontos
+            <Title size={20}>{user.wallet} </Title>pontos
           </Title>
         </View>
       </View>

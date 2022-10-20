@@ -3,13 +3,14 @@ import React from "react";
 import { Colors } from "../../utils/colors";
 import { Fonts } from "../../utils/fonts";
 
-const Button = ({ label, onPress, style, inverse, ...rest }) => {
+const Button = ({ label, onPress, style, inverse, disabled, ...rest }) => {
   return (
     <TouchableOpacity
       onPress={onPress}
+      disabled={disabled}
       style={[
         {
-          backgroundColor: inverse ? Colors.MAIN : Colors.WHITE,
+          backgroundColor: inverse ? disabled ? `${Colors.MAIN}80`:Colors.MAIN : Colors.WHITE,
           height: 56,
           borderRadius: 8,
           justifyContent: "center",

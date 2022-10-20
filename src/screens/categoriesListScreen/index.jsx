@@ -1,22 +1,75 @@
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
-import React from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Modal,
+  TextInput,
+} from "react-native";
+import React, { useEffect, useState } from "react";
 import { Fonts } from "../../utils/fonts";
 import { Colors } from "../../utils/colors";
-import Label from "../../components/label";
 import { useNavigation } from "@react-navigation/native";
 import { navigationConstants } from "../../routes/constants";
 import Title from "../../components/title";
+import Button from "../../components/button";
 import Icon from "react-native-vector-icons/FontAwesome5";
-const categories = [
-  { id: 0, name: "Cartão Presente", icon: "gift" },
-  { id: 1, name: "Alugar Veículos", icon: "car" },
-  { id: 2, name: "Assinaturas", icon: "pager" },
-  { id: 3, name: "Combustível", icon: "gas-pump" },
-  { id: 4, name: "Serviços", icon: "wrench" },
-  { id: 5, name: "Ford com Você", icon: "plane-departure" },
-];
+import useAPI from "../../hooks/useAPI";
+import AddPointsModal from "../../components/addPointsModal";
+
 const CategoriesListScreen = () => {
   const navigation = useNavigation();
+  const api = useAPI();
+
+  const [categories, setCategories] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+
+  const getIcon = (categoryName) => {
+    switch (categoryName) {
+      case "Cartão Presente":
+        return "gift";
+      case "Alugar Veículos":
+        return "car";
+      case "Assinaturas":
+        return "pager";
+      case "Combustível":
+        return "gas-pump";
+      case "Serviços":
+        return "wrench";
+      case "Ford com Você":
+        return "plane-departure";
+
+      default:
+        break;
+    }
+  };
+
+  const categoriesObjectArray = (categoriesArray) => {
+    const objArr = [];
+    categoriesArray.map((item, i) => {
+      const obj = {
+        id: item.uuid,
+        name: item.name === "Assinaturas" ? "Ford GO" : item.name,
+        icon: getIcon(item.name),
+      };
+      objArr.push(obj);
+    });
+    return objArr;
+  };
+
+  const getCategories = async () => {
+    try {
+      const response = await api.get("categories");
+      const categories = categoriesObjectArray(response.data);
+      setCategories(categories);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    getCategories();
+  }, []);
 
   const renderCategoryCard = ({ item, index }) => {
     return (
@@ -33,7 +86,6 @@ const CategoriesListScreen = () => {
           flex: 1,
           height: 120,
           marginTop: 16,
-          marginRight: index % 2 ? 16 : 0,
           marginLeft: !(index % 2) ? 0 : 16,
           justifyContent: "space-between",
           alignItems: "center",
@@ -76,6 +128,28 @@ const CategoriesListScreen = () => {
         }}
         renderItem={renderCategoryCard}
       />
+      {showModal && (
+        <AddPointsModal
+          visible={showModal}
+          onRequestClose={() => setShowModal(false)}
+        />
+      )}
+      <TouchableOpacity
+        onPress={() => setShowModal(true)}
+        style={{
+          position: "absolute",
+          width: 60,
+          height: 60,
+          borderRadius: 100,
+          backgroundColor: "white",
+          right: 16,
+          bottom: 16,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Icon name="plus" color={Colors.MAIN} size={20} />
+      </TouchableOpacity>
     </View>
   );
 };

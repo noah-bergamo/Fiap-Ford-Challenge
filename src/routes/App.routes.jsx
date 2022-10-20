@@ -1,35 +1,15 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
-import { navigationConstants } from "./constants";
-import { CategoriesListScreen } from "../screens";
-import CategoryDetailScreen from "../screens/categoryDetailsScreen";
-import RewardDetailsScreen from "../screens/RewardDetailsScreen";
-import Header from "../components/header";
-
-const AppStack = createNativeStackNavigator();
+import { useSelector } from "react-redux";
+import AuthNavigator from "./Auth.routes";
+import MainNavigator from "./Main.routes";
 
 const AppNavigator = () => {
+  const userState = useSelector((state) => state.user);
+
   return (
     <NavigationContainer>
-      <AppStack.Navigator
-        initialRouteName={navigationConstants.SCREENS.CATEGORIES_LIST}
-        screenOptions={{ header: () => <Header /> }}
-      >
-        <AppStack.Screen
-          name={navigationConstants.SCREENS.CATEGORIES_LIST}
-          component={CategoriesListScreen}
-        />
-        <AppStack.Screen
-          name={navigationConstants.SCREENS.CATEGORY_DETAILS}
-          component={CategoryDetailScreen}
-        />
-        <AppStack.Screen
-          name={navigationConstants.SCREENS.REWARD_DETAILS}
-          component={RewardDetailsScreen}
-        />
-      </AppStack.Navigator>
+      {userState.user ? <MainNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 };
