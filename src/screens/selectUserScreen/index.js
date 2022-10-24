@@ -8,11 +8,14 @@ import Title from "../../components/title";
 import Button from "../../components/button";
 import { Fonts } from "../../utils/fonts";
 import { Colors } from "../../utils/colors";
+import { useNavigation } from "@react-navigation/native";
+import { navigationConstants } from "../../routes/constants";
 
 const SelectUserScreen = () => {
   const api = useAPI();
   const dispatch = useDispatch();
-  const [cpf, setCpf] = useState("34370954800");
+  const navigation = useNavigation();
+  const [cpf, setCpf] = useState("");
 
   const formatUser = (userData) => {
     const { firstName, lastName, wallet, email, rewards, uuid } = userData;
@@ -31,8 +34,10 @@ const SelectUserScreen = () => {
   const login = async () => {
     try {
       const response = await api.get(`customers/${cpf}`);
-      const userData = formatUser(response.data);
-      dispatch(setUser(userData));
+      if (response.status === 200) {
+        const userData = formatUser(response.data);
+        dispatch(setUser(userData));
+      }
     } catch (e) {
       console.log({ e });
     }
@@ -73,6 +78,12 @@ const SelectUserScreen = () => {
       />
       <View style={{ width: "80%", marginTop: 40 }}>
         <Button label="Entrar" inverse onPress={() => login()} />
+        <Button
+          label={"Criar conta"}
+          onPress={() =>
+            navigation.navigate(navigationConstants.SCREENS.SIGN_UP)
+          }
+        />
       </View>
     </View>
   );

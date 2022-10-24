@@ -54,9 +54,7 @@ const Header = () => {
       >
         <Image
           // source={{ uri: user.photo }}
-          source={{
-            uri: "https://media-exp1.licdn.com/dms/image/C4D03AQHuPGnjIXjYRg/profile-displayphoto-shrink_200_200/0/1598300039292?e=2147483647&v=beta&t=DI1z2LuiEVxMnHDaV_XbsLuzRdqglZ5Ho5IwAymxENM",
-          }}
+          source={require("../../../assets/images/user-photo.jpg")}
           resizeMethod="resize"
           resizeMode="contain"
           style={{ width: 48, height: 48, borderRadius: 200 }}

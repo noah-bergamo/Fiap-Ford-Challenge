@@ -6,6 +6,7 @@ export const navigationConstants = {
   },
   SCREENS: {
     SELECT_USER: "SelectUserScreen",
+    SIGN_UP: "SignUpScreen",
     CATEGORIES_LIST: "CategoriesListScreen",
     CATEGORY_DETAILS: "CategoryDetailsScreen",
     REWARD_DETAILS: "RewardDetailsScreen",

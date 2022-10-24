@@ -1,16 +1,28 @@
-import { Text, TouchableOpacity } from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity } from "react-native";
 import React from "react";
 import { Colors } from "../../utils/colors";
 import { Fonts } from "../../utils/fonts";
 
-const Button = ({ label, onPress, style, inverse, disabled, ...rest }) => {
+const Button = ({
+  label,
+  onPress,
+  style,
+  inverse,
+  disabled,
+  loading,
+  ...rest
+}) => {
   return (
     <TouchableOpacity
       onPress={onPress}
-      disabled={disabled}
+      disabled={disabled || loading}
       style={[
         {
-          backgroundColor: inverse ? disabled ? `${Colors.MAIN}80`:Colors.MAIN : Colors.WHITE,
+          backgroundColor: inverse
+            ? disabled
+              ? `${Colors.MAIN}80`
+              : Colors.MAIN
+            : Colors.WHITE,
           height: 56,
           borderRadius: 8,
           justifyContent: "center",
@@ -20,15 +32,19 @@ const Button = ({ label, onPress, style, inverse, disabled, ...rest }) => {
       ]}
       {...rest}
     >
-      <Text
-        style={{
-          fontSize: 16,
-          fontFamily: Fonts.BOLD,
-          color: inverse ? Colors.WHITE : Colors.MAIN,
-        }}
-      >
-        {label}
-      </Text>
+      {loading ? (
+        <ActivityIndicator color={"white"} />
+      ) : (
+        <Text
+          style={{
+            fontSize: 16,
+            fontFamily: Fonts.BOLD,
+            color: inverse ? Colors.WHITE : Colors.MAIN,
+          }}
+        >
+          {label}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };
